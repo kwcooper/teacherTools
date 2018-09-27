@@ -3,7 +3,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open('testData.csv',newline='') as file:
+with open('Data_Export_ExamID_5619_Section_8259.csv',newline='') as file:
     file_read = list(csv.reader(file, delimiter=',', quotechar='|'))
     
     metaData = file_read[0:3]
@@ -12,9 +12,9 @@ with open('testData.csv',newline='') as file:
     data = file_read[7:len(file_read)]
 
 
-def sturgesBins(data):
+def sturgesBins2(data,n):
 # to determine histogram bin size
-    return 1. + (3.322 * math.log(len(data)))
+    return 1.+ n + (3.322 * math.log(len(data)))
 
 def variance(data):
     return sum((xi - (sum(data)/len(data))) ** 2 for xi in data) / len(data)
@@ -23,27 +23,35 @@ def std(data):
     return math.sqrt(variance(data))
 
 
+##scores,percent = [],[]
+##for stu in data:
+##    scores.append(float(stu[12]))
+##    percent.append((float(stu[12])/float(key[12]))*100)
+##
+
 scores,percent = [],[]
 for stu in data:
     scores.append(float(stu[12]))
     percent.append((float(stu[12])/float(key[12]))*100)
 
-
+def basicStats(data,numQ,percent):
 # general stats on percentages
-print('Number of students in dataset:',len(data))
-print('Average percent:',(sum(percent)/len(percent)))
-print('Max: {}, Min: {}'.format(max(percent),min(percent)))
-print('Standard deviation:', std(percent))
+    print('Number of students in dataset:',len(data))
+    print('Num Questions:', numQ)
+    print('Average score: {0:.2f}%'.format(sum(percent)/len(percent)))
+    print('Max: {}, Min: {}'.format(max(percent),min(percent)))
+    print('Standard deviation: {0:.2f}'.format(std(percent)))
+
+
+basicStats(data,(len(key[13:len(key)])),percent)
 
 
 # Plot Histograms
-##bns = int(sturgesBins(scores))
-##plt.hist(scores,bins=bns)
-##plt.title('score')
-##plt.show()
-##plt.hist(percent,bins=bns)
-##plt.title('percent')
-##plt.show()
+bns = int(sturgesBins2(scores,6))
+if 0:
+    plt.hist(percent,bins=bns)
+    plt.title('percent')
+    plt.show()
 
 
 
@@ -70,7 +78,7 @@ for q in range(13,len(data[0])):
                 badQ = True
                 
                 
-    results.append([numCorrect,freq,badQ])
+    results.append([numCorrect,freq,badQ,q])
     if 0:
         print('NC:',numCorrect)
         print(freq)
@@ -133,6 +141,31 @@ plt.savefig('questionFigs/qSummary.png')
 plt.cla()
 
 
+# Throw out certin scores
+badQs = [result[3] for result in results if result[2]]
+
+# find new scores
+scores = []
+for stu in range(0,len(data)):
+    stuScore = 0
+    for qq in range(13,len(data[0])):
+        if qq not in badQs:
+            if key[qq] == data[stu][qq]:
+                stuScore += 1
+    scores.append([stuScore,data[stu][6],data[stu][7]])
+
+# find new percentages
+percent_new = [stu[0]/(len(key[13:len(key)])-len(badQs))*100 for stu in scores]
+basicStats(scores,(len(key[13:len(key)])-len(badQs)),percent_new)
+
+# plot new vs old scores
+bns = int(sturgesBins2(scores,6))
+plt.hist(percent,bins=bns,alpha=0.5,label='original')
+plt.hist(percent_new,bins=bns,alpha=0.5,label='updated')
+plt.legend(loc='upper right')
+plt.title('New vs Old score distribution')
+plt.savefig('questionFigs/scoreDistNewOld.png')
+plt.cla()
 
 
 for row in file_read:
