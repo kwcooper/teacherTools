@@ -3,7 +3,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open('Data_Export_ExamID_5619_Section_8259.csv',newline='') as file:
+with open('testData.csv',newline='') as file:
     file_read = list(csv.reader(file, delimiter=',', quotechar='|'))
     
     metaData = file_read[0:3]
