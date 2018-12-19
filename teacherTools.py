@@ -3,6 +3,8 @@ import random
 #things to build?
 #   seating chart
 #   exporting stuff
+#   random exam simulator
+#       input could be a vector of number of options
 
 
 groups = []
